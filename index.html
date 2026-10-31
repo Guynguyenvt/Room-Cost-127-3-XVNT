@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tiền phòng trọ</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tiền phòng">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🏠%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--tx:#1b2430;--mu:#6b7785;--ln:#e3e8ee;--ac:#0f766e;--ac2:#ccfbf1;--wa:#b45309;--er:#dc2626;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1419;--card:#1a212b;--tx:#e8edf3;--mu:#8b97a6;--ln:#2a3440;--ac:#2dd4bf;--ac2:#134e4a;--wa:#fbbf24;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1419;--card:#1a212b;--tx:#e8edf3;--mu:#8b97a6;--ln:#2a3440;--ac:#2dd4bf;--ac2:#134e4a;--wa:#fbbf24;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+main{max-width:720px;margin:0 auto;padding:14px}
+h1{font-size:20px;margin:4px 0 12px}h2{font-size:15px;margin:18px 0 8px;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:14px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mu{color:var(--mu);font-size:13px}.big{font-size:22px;font-weight:700}
+.item{cursor:pointer}.item:active{background:var(--ac2)}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--ac2);color:var(--ac)}.tag.w{background:transparent;border:1px solid var(--wa);color:var(--wa)}
+label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);color:var(--tx)}
+input:focus{outline:2px solid var(--ac);border-color:transparent}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:inherit;border:0;border-radius:10px;padding:12px 16px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
+:root:not([data-theme="light"]) button.p{color:#06201d}
+button.s{background:var(--ac2);color:var(--ac)}button.d{background:transparent;color:var(--er);border:1px solid var(--er)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btns>*{flex:1;min-width:120px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--ln);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;background:none;color:var(--mu);border-radius:0;padding:10px 4px 9px;font-size:12px;font-weight:500}
+nav button span{display:block;font-size:20px;line-height:1.2}nav button.on{color:var(--ac)}
+.bars{display:flex;align-items:flex-end;gap:5px;height:110px;padding-top:6px}
+.bars div{flex:1;background:var(--ac);border-radius:4px 4px 0 0;min-height:3px;position:relative;opacity:.85}
+.bars div:hover{opacity:1}.bl{display:flex;gap:5px}.bl span{flex:1;text-align:center;font-size:10px;color:var(--mu)}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:7px 4px;border-bottom:1px solid var(--ln);text-align:right}td:first-child,th:first-child{text-align:left}
+th{color:var(--mu);font-weight:500;font-size:12px}
+.prev{width:100%;border-radius:12px;border:1px solid var(--ln);display:block;background:#fff}
+.sum{background:var(--ac2);border-radius:12px;padding:12px;margin-top:12px}.hide{display:none}
+#st{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));right:12px;font-size:12px;font-weight:500;color:var(--mu);background:var(--card);border:1px solid var(--ln);border-radius:99px;padding:4px 10px;z-index:4}#st:empty{display:none}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:99px;font-size:14px;z-index:9}
+@media (min-width:700px){.g3{grid-template-columns:repeat(3,1fr)!important}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<button id="st" type="button" title="Đồng bộ ngay"></button>
+<nav id="nav"></nav>
+<script>
+"use strict";
+const KEY="tro127.v1";
+const D=(id,e,w,h,re,rw,rh,base)=>({id,e,w,h,re,rw,rh,tr:20000,rm:2500000,note:"",base:!!base});
+const SEED={cfg:{name:"Phòng 127 XVNT",tenant:"",re:4000,rw:17000,rh:20000,tr:20000,rm:2500000},recs:[
+D("2025-05",1332,62,1,3500,15000,18000,true),D("2025-06",1410,66,1,3500,15000,18000),D("2025-07",1496,70,1,3500,15000,18000),
+D("2025-08",1590,75,1,3500,15000,18000),D("2025-09",1680,80,1,3500,15000,18000),D("2025-10",1796,83,1,3500,15000,18000),
+D("2025-11",1871,85,1,3500,15000,18000),D("2025-12",1960,89,1,3500,15000,18000),D("2026-01",2051,93,4,3500,15000,20000),
+D("2026-02",2171,100,6,3500,15000,20000),D("2026-03",2272,104,6,3500,17000,20000),D("2026-04",2357,107,6,3500,17000,20000),
+D("2026-05",2462,109,6,4000,17000,20000),D("2026-06",2547,113,6,4000,17000,20000),D("2026-07",2674,119,6,4000,17000,20000),
+D("2026-08",2785,124,6,4000,17000,20000),D("2026-09",2874,127,6,4000,17000,20000),D("2026-10",2983,131,6,4000,17000,20000)]};
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.recs)S=JSON.parse(JSON.stringify(SEED));
+let SY=null;try{SY=JSON.parse(localStorage.getItem("tro127.sync"))}catch(e){}
+let pt=null;
+const APP="tien-tro";
+const setSt=t=>{const e=document.getElementById("st");if(e)e.textContent=t};
+const saveSY=()=>{try{localStorage.setItem("tro127.sync",JSON.stringify(SY))}catch(e){}};
+const save=(t=true)=>{if(t)S.ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(t&&SY){clearTimeout(pt);pt=setTimeout(push,600)}};
+async function tok(){
+  if(SY.t&&Date.now()<SY.x-60000)return SY.t;
+  const r=await fetch("https://securetoken.googleapis.com/v1/token?key="+SY.k,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"grant_type=refresh_token&refresh_token="+encodeURIComponent(SY.r)});
+  if(!r.ok)throw "AUTH";const j=await r.json();
+  SY.t=j.id_token;SY.r=j.refresh_token;SY.x=Date.now()+(+j.expires_in)*1000;saveSY();return SY.t}
+const furl=()=>`https://firestore.googleapis.com/v1/projects/${SY.p}/databases/(default)/documents/users/${SY.u}/apps/${APP}`;
+async function fs(method,qs,body){const t=await tok();return fetch(furl()+qs,{method,headers:{Authorization:"Bearer "+t,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined})}
+async function push(){if(!SY)return;setSt("☁️ Đang gửi…");
+  try{const r=await fs("PATCH","?updateMask.fieldPaths=data&updateMask.fieldPaths=ts",{fields:{data:{stringValue:JSON.stringify(S)},ts:{integerValue:String(S.ts)}}});
+  if(!r.ok)throw r.status;setSt("☁️ Đã đồng bộ")}catch(e){setSt("⚠️ Lỗi · bấm để thử lại")}}
+async function pull(){if(!SY)return;setSt("☁️ Đang đồng bộ…");
+  try{const r=await fs("GET","");
+  if(r.status==404){S.ts=S.ts||Date.now();save(false);await push();return}
+  if(!r.ok)throw r.status;const j=await r.json(),ts=+j.fields.ts.integerValue;
+  if(ts>(S.ts||0)){S=JSON.parse(j.fields.data.stringValue);S.ts=ts;save(false);setSt("☁️ Đã đồng bộ");if(tab!="edit")render()}
+  else if(ts<(S.ts||0))await push();else setSt("☁️ Đã đồng bộ")}catch(e){setSt("⚠️ Lỗi · bấm để thử lại")}}
+addEventListener("focus",pull);document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
+const $=s=>document.querySelector(s);
+const n0=v=>(v==null||isNaN(v))?"–":Math.round(v).toLocaleString("vi-VN");
+const vnd=v=>n0(v)+" đ";
+const mlabel=id=>"Tháng "+(+id.slice(5))+"/"+id.slice(0,4);
+const num=v=>(v===""||v==null)?null:+v;
+const sorted=()=>S.recs.sort((a,b)=>a.id<b.id?-1:1);
+function calc(r){
+  const L=sorted(),i=L.indexOf(r),p=L[i-1];
+  const o={p,i};
+  if(r.base||!p){o.base=true;return o}
+  const ok=r.e!=null&&r.w!=null;
+  const de=r.e!=null&&p.e!=null?r.e-p.e:null,dw=r.w!=null&&p.w!=null?r.w-p.w:null;
+  const dh=r.h!=null&&p.h!=null?r.h-p.h:0;
+  Object.assign(o,{de,dw,dh,ce:de==null?null:de*r.re,cw:dw==null?null:dw*r.rw,ch:dh*r.rh});
+  o.total=ok&&de!=null&&dw!=null?o.ce+o.cw+o.ch+r.tr+r.rm:null;
+  return o;
+}
+let tab="list",editing=null,exportId=null;
+const TABS=[["list","📋","Tháng"],["edit","✏️","Nhập liệu"],["img","🖼️","Xuất ảnh"],["set","⚙️","Cài đặt"]];
+function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+function render(){
+  $("#nav").innerHTML=TABS.map(t=>`<button class="${tab==t[0]?"on":""}" data-t="${t[0]}"><span>${t[1]}</span>${t[2]}</button>`).join("");
+  $("#nav").onclick=e=>{const b=e.target.closest("button");if(b){tab=b.dataset.t;if(tab=="edit"&&!editing)editing=null;render();scrollTo(0,0)}};
+  ({list:vList,edit:vEdit,img:vImg,set:vSet})[tab]();
+}
+/* ---------- Danh sách ---------- */
+function vList(){
+  const L=sorted().map(r=>({r,c:calc(r)}));
+  const billed=L.filter(x=>x.c.total!=null);
+  const last12=billed.slice(-12);
+  const mx=Math.max(1,...last12.map(x=>x.c.total));
+  const yrs=[...new Set(billed.map(x=>x.r.id.slice(0,4)))];
+  const avg=billed.length?billed.reduce((a,x)=>a+x.c.total,0)/billed.length:0;
+  const ae=billed.length?billed.reduce((a,x)=>a+x.c.de,0)/billed.length:0;
+  $("#app").innerHTML=`<h1>🏠 ${esc(S.cfg.name)}</h1>
+  <div class="card"><div class="row"><div><div class="mu">Trung bình mỗi tháng</div><div class="big">${vnd(avg)}</div></div>
+  <div style="text-align:right"><div class="mu">Điện TB</div><div style="font-weight:600">${n0(ae)} kWh</div></div></div>
+  <div class="bars">${last12.map(x=>`<div title="${vnd(x.c.total)}" style="height:${x.c.total/mx*100}%"></div>`).join("")}</div>
+  <div class="bl">${last12.map(x=>`<span>${+x.r.id.slice(5)}</span>`).join("")}</div></div>
+  ${yrs.map(y=>{const t=billed.filter(x=>x.r.id.startsWith(y));return`<div class="card row"><div><b>Năm ${y}</b><div class="mu">${t.length} tháng có hoá đơn</div></div><b>${vnd(t.reduce((a,x)=>a+x.c.total,0))}</b></div>`}).join("")}
+  <h2>Chi tiết từng tháng</h2>
+  ${L.slice().reverse().map(({r,c})=>`<div class="card item" data-id="${r.id}"><div class="row"><div><b>${mlabel(r.id)}</b>
+  <div class="mu">${c.base?"Mốc công tơ ban đầu":`Điện ${n0(c.de)} số · Nước ${n0(c.dw)} khối`}</div></div>
+  <div style="text-align:right">${c.total!=null?`<b>${vnd(c.total)}</b>`:`<span class="tag w">${c.base?"Mốc":"Chưa nhập"}</span>`}</div></div></div>`).join("")}`;
+  $("#app").onclick=e=>{const c=e.target.closest(".item");if(c){editing=c.dataset.id;tab="edit";render();scrollTo(0,0)}};
+}
+const esc=s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+function nextId(){const L=sorted();if(!L.length)return new Date().toISOString().slice(0,7);const [y,m]=L[L.length-1].id.split("-").map(Number);return m==12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,"0")}`}
+/* ---------- Nhập liệu ---------- */
+function vEdit(){
+  let r=editing&&S.recs.find(x=>x.id==editing);
+  const isNew=!r;
+  if(isNew){const L=sorted(),l=L[L.length-1]||{};r={id:nextId(),e:null,w:null,h:l.h??null,re:S.cfg.re,rw:S.cfg.rw,rh:S.cfg.rh,tr:S.cfg.tr,rm:S.cfg.rm,note:""}}
+  const L0=sorted().filter(x=>x.id<r.id);const p=L0[L0.length-1];
+  $("#app").innerHTML=`<h1>${isNew?"Nhập tháng mới":"Sửa "+mlabel(r.id)}</h1>
+  <div class="card"><label>Tháng</label><input type="month" id="f_id" value="${r.id}" ${isNew?"":"disabled"}>
+  <div class="g2"><div><label>Số điện ${p?`(tháng trước: ${n0(p.e)})`:""}</label><input id="f_e" type="number" inputmode="numeric" value="${r.e??""}"></div>
+  <div><label>Giá điện (đ/số)</label><input id="f_re" type="number" inputmode="numeric" value="${r.re}"></div>
+  <div><label>Số nước ${p?`(tháng trước: ${n0(p.w)})`:""}</label><input id="f_w" type="number" inputmode="numeric" value="${r.w??""}"></div>
+  <div><label>Giá nước (đ/khối)</label><input id="f_rw" type="number" inputmode="numeric" value="${r.rw}"></div>
+  <div><label>Số nước nóng ${p?`(tháng trước: ${n0(p.h)})`:""}</label><input id="f_h" type="number" inputmode="numeric" value="${r.h??""}"></div>
+  <div><label>Giá nước nóng (đ/khối)</label><input id="f_rh" type="number" inputmode="numeric" value="${r.rh}"></div>
+  <div><label>Tiền rác</label><input id="f_tr" type="number" inputmode="numeric" value="${r.tr}"></div>
+  <div><label>Tiền phòng</label><input id="f_rm" type="number" inputmode="numeric" value="${r.rm}"></div></div>
+  <label>Ghi chú (hiện trên ảnh)</label><input id="f_note" value="${esc(r.note)}" placeholder="VD: đã chuyển khoản ngày 5">
+  <div class="sum" id="sum"></div>
+  <div class="btns"><button class="p" id="save">💾 Lưu</button>${isNew?"":`<button class="s" id="toimg">🖼️ Xuất ảnh</button><button class="d" id="del">Xoá</button>`}</div></div>`;
+  const read=()=>({id:$("#f_id").value||r.id,e:num($("#f_e").value),w:num($("#f_w").value),h:num($("#f_h").value),re:+$("#f_re").value||0,rw:+$("#f_rw").value||0,rh:+$("#f_rh").value||0,tr:+$("#f_tr").value||0,rm:+$("#f_rm").value||0,note:$("#f_note").value.trim(),base:r.base});
+  const upd=()=>{
+    const t=read(),de=t.e!=null&&p?.e!=null?t.e-p.e:null,dw=t.w!=null&&p?.w!=null?t.w-p.w:null,dh=t.h!=null&&p?.h!=null?t.h-p.h:0;
+    const ce=de==null?0:de*t.re,cw=dw==null?0:dw*t.rw,ch=dh*t.rh;
+    $("#sum").innerHTML=p&&!r.base?`<div class="row"><span>Điện ${n0(de)} × ${n0(t.re)}</span><b>${vnd(ce)}</b></div><div class="row"><span>Nước ${n0(dw)} × ${n0(t.rw)}</span><b>${vnd(cw)}</b></div><div class="row"><span>Nước nóng ${n0(dh)} × ${n0(t.rh)}</span><b>${vnd(ch)}</b></div><div class="row"><span>Rác + Phòng</span><b>${vnd(t.tr+t.rm)}</b></div><div class="row" style="margin-top:6px;font-size:18px"><b>TỔNG</b><b>${vnd(ce+cw+ch+t.tr+t.rm)}</b></div>`:`<span class="mu">Đây là tháng mốc, chưa tính tiền.</span>`;
+  };
+  $("#app").oninput=upd;$("#app").onclick=null;upd();
+  $("#save").onclick=()=>{
+    const t=read();
+    if(isNew&&S.recs.some(x=>x.id==t.id)){toast("Tháng này đã có dữ liệu");return}
+    if(p&&!r.base){if(t.e!=null&&p.e!=null&&t.e<p.e){if(!confirm("Số điện nhỏ hơn tháng trước. Vẫn lưu?"))return}
+      if(t.w!=null&&p.w!=null&&t.w<p.w){if(!confirm("Số nước nhỏ hơn tháng trước. Vẫn lưu?"))return}}
+    if(isNew)S.recs.push(t);else Object.assign(r,t);
+    save();editing=t.id;exportId=t.id;toast("Đã lưu ✓");tab="list";render();
+  };
+  if(!isNew){
+    $("#del").onclick=()=>{if(confirm("Xoá "+mlabel(r.id)+"?")){S.recs=S.recs.filter(x=>x!==r);save();editing=null;tab="list";render()}};
+    $("#toimg").onclick=()=>{exportId=r.id;tab="img";render()};
+  }
+}
+/* ---------- Xuất ảnh ---------- */
+function drawBill(r){
+  const c=calc(r),W=720,pad=36;
+  const rows=[["Điện",`${n0(r.e)}  →  ${n0(c.p?.e)}`.split("  →  ").reverse().join("  →  "),n0(c.de)+" số",n0(r.re),c.ce]];
+  rows.length=0;
+  rows.push(["Điện",`${n0(c.p.e)} → ${n0(r.e)}`,`${n0(c.de)} số`,n0(r.re),c.ce]);
+  rows.push(["Nước",`${n0(c.p.w)} → ${n0(r.w)}`,`${n0(c.dw)} khối`,n0(r.rw),c.cw]);
+  if(c.dh>0||r.h!=null&&c.p.h!=null&&(c.dh>0))rows.push(["Nước nóng",`${n0(c.p.h)} → ${n0(r.h)}`,`${n0(c.dh)} khối`,n0(r.rh),c.ch]);
+  rows.push(["Rác","","","",r.tr]);rows.push(["Tiền phòng","","","",r.rm]);
+  const H=220+rows.length*58+150+(r.note?40:0);
+  const cv=document.createElement("canvas");cv.width=W*2;cv.height=H*2;
+  const x=cv.getContext("2d");x.scale(2,2);
+  const F=(s,w="400")=>x.font=`${w} ${s}px -apple-system,"Segoe UI",Roboto,Arial,sans-serif`;
+  x.fillStyle="#fff";x.fillRect(0,0,W,H);
+  x.fillStyle="#0f766e";x.fillRect(0,0,W,120);
+  x.fillStyle="#fff";F(30,"700");x.fillText("PHIẾU TIỀN PHÒNG",pad,52);
+  F(22);x.fillText(mlabel(r.id)+" · "+S.cfg.name,pad,90);
+  let y=150;x.fillStyle="#6b7785";F(15);
+  if(S.cfg.tenant){x.fillText("Người thuê: "+S.cfg.tenant,pad,y);y+=24}
+  y=Math.max(y,160)+8;
+  x.fillStyle="#6b7785";F(14,"600");
+  x.fillText("KHOẢN",pad,y);x.fillText("CHỈ SỐ CŨ → MỚI",pad+120,y);x.fillText("TIÊU THỤ",pad+330,y);x.fillText("ĐƠN GIÁ",pad+450,y);x.textAlign="right";x.fillText("THÀNH TIỀN",W-pad,y);x.textAlign="left";
+  y+=14;x.strokeStyle="#e3e8ee";x.lineWidth=1;x.beginPath();x.moveTo(pad,y);x.lineTo(W-pad,y);x.stroke();
+  rows.forEach(rw=>{y+=38;x.fillStyle="#1b2430";F(18,"600");x.fillText(rw[0],pad,y);F(15);x.fillStyle="#44505e";
+    x.fillText(rw[1],pad+120,y);x.fillText(rw[2],pad+330,y);x.fillText(rw[3],pad+450,y);
+    F(18,"600");x.fillStyle="#1b2430";x.textAlign="right";x.fillText(n0(rw[4]),W-pad,y);x.textAlign="left";
+    y+=20;x.beginPath();x.moveTo(pad,y);x.lineTo(W-pad,y);x.stroke()});
+  y+=24;x.fillStyle="#ccfbf1";x.beginPath();x.roundRect(pad,y,W-2*pad,84,14);x.fill();
+  x.fillStyle="#0f766e";F(18,"600");x.fillText("TỔNG CỘNG",pad+20,y+50);
+  F(34,"700");x.textAlign="right";x.fillText(vnd(c.total),W-pad-20,y+55);x.textAlign="left";
+  y+=84;
+  if(r.note){y+=36;x.fillStyle="#44505e";F(16);x.fillText("Ghi chú: "+r.note,pad,y)}
+  y+=34;x.fillStyle="#9aa5b1";F(13);x.fillText("Lập ngày "+new Date().toLocaleDateString("vi-VN"),pad,y);
+  return cv;
+}
+function vImg(){
+  const L=sorted().filter(r=>calc(r).total!=null).reverse();
+  if(!L.length){$("#app").innerHTML=`<h1>Xuất ảnh</h1><div class="card mu">Chưa có tháng nào đủ dữ liệu.</div>`;return}
+  if(!exportId||!L.some(r=>r.id==exportId))exportId=L[0].id;
+  $("#app").innerHTML=`<h1>Xuất ảnh gửi chủ trọ</h1><div class="card"><label>Chọn tháng</label>
+  <select id="sel">${L.map(r=>`<option value="${r.id}" ${r.id==exportId?"selected":""}>${mlabel(r.id)}</option>`).join("")}</select>
+  <div class="btns"><button class="p" id="share">📤 Chia sẻ / Lưu ảnh</button></div>
+  <p class="mu" id="hint">Trên iPhone: nhấn giữ vào ảnh bên dưới → “Lưu vào Ảnh” cũng được.</p></div>
+  <img id="pv" class="prev" alt="Phiếu tiền phòng">`;
+  let blob=null;
+  const gen=()=>{const r=S.recs.find(x=>x.id==exportId);const cv=drawBill(r);$("#pv").src=cv.toDataURL("image/png");cv.toBlob(b=>blob=b,"image/png")};
+  gen();
+  $("#sel").onchange=e=>{exportId=e.target.value;gen()};
+  $("#share").onclick=async()=>{
+    if(!blob){toast("Đang tạo ảnh…");return}
+    const name=`tien-phong-${exportId}.png`;
+    try{const f=new File([blob],name,{type:"image/png"});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:mlabel(exportId)});return}}catch(e){if(e&&e.name=="AbortError")return}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+    toast("Đã tải ảnh về máy ✓");
+  };
+}
+/* ---------- Cài đặt ---------- */
+const syncHtml=()=>SY?`<div class="card"><h2 style="margin-top:0">☁️ Đồng bộ đã bật</h2><p class="mu">Tài khoản: <b>${esc(SY.em)}</b>. Dữ liệu tự đồng bộ khi mở app và sau mỗi lần lưu.</p><div class="btns"><button class="p" id="snow">🔄 Đồng bộ ngay</button><button class="s" id="scp">📋 Sao chép mã cấu hình</button><button class="d" id="soff">Đăng xuất</button></div></div>`:
+`<div class="card"><h2 style="margin-top:0">☁️ Đồng bộ PC ↔ iPhone</h2><p class="mu">Đăng nhập tài khoản Firebase của bạn. Trên máy thứ hai, dán mã cấu hình để khỏi gõ lại Project ID và API Key.</p><label>Mã cấu hình (tuỳ chọn)</label><textarea id="sj" rows="2" placeholder="Dán mã từ máy khác"></textarea><div class="g2"><div><label>Project ID</label><input id="sp" autocapitalize="off" autocorrect="off"></div><div><label>API Key</label><input id="sk" autocapitalize="off" autocorrect="off"></div><div><label>Email</label><input id="se" type="email" autocapitalize="off"></div><div><label>Mật khẩu</label><input id="spw" type="password"></div></div><div class="btns"><button class="p" id="sin">Đăng nhập</button><button class="s" id="sup">Đăng ký mới</button></div></div>`;
+const AE={EMAIL_NOT_FOUND:"Email chưa đăng ký",INVALID_PASSWORD:"Sai mật khẩu",INVALID_LOGIN_CREDENTIALS:"Sai email hoặc mật khẩu",EMAIL_EXISTS:"Email đã có, hãy bấm Đăng nhập",OPERATION_NOT_ALLOWED:"Chưa bật Email/Password trong Firebase",API_KEY_INVALID:"API Key không đúng",WEAK_PASSWORD:"Mật khẩu tối thiểu 6 ký tự",INVALID_EMAIL:"Email không hợp lệ",TOO_MANY_ATTEMPTS_TRY_LATER:"Thử quá nhiều lần, hãy chờ một lúc"};
+async function auth(mode){
+  const p=$("#sp").value.trim(),k=$("#sk").value.trim(),em=$("#se").value.trim(),pw=$("#spw").value;
+  if(!p||!k||!em||!pw){toast("Nhập đủ Project ID, API Key, Email, Mật khẩu");return}
+  try{const r=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:${mode}?key=${encodeURIComponent(k)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw,returnSecureToken:true})});
+    const j=await r.json();if(!r.ok)throw (j.error&&j.error.message)||"ERR";
+    SY={p,k,em,u:j.localId,r:j.refreshToken,t:j.idToken,x:Date.now()+(+j.expiresIn)*1000};saveSY();
+    toast("Đã đăng nhập ✓");render();pull();
+  }catch(e){toast(AE[String(e).split(/[ :]/)[0]]||"Lỗi: "+e)}}
+function vSet(){
+  const c=S.cfg;
+  $("#app").innerHTML=`<h1>Cài đặt</h1><div class="card"><h2 style="margin-top:0">Thông tin phòng</h2>
+  <label>Tên phòng / địa chỉ</label><input id="c_name" value="${esc(c.name)}"><label>Người thuê (hiện trên ảnh)</label><input id="c_tenant" value="${esc(c.tenant)}">
+  <h2>Giá mặc định cho tháng mới</h2><div class="g2 g3" style="display:grid;gap:10px">
+  <div><label>Điện</label><input id="c_re" type="number" inputmode="numeric" value="${c.re}"></div><div><label>Nước</label><input id="c_rw" type="number" inputmode="numeric" value="${c.rw}"></div>
+  <div><label>Nước nóng</label><input id="c_rh" type="number" inputmode="numeric" value="${c.rh}"></div><div><label>Rác</label><input id="c_tr" type="number" inputmode="numeric" value="${c.tr}"></div>
+  <div><label>Tiền phòng</label><input id="c_rm" type="number" inputmode="numeric" value="${c.rm}"></div></div>
+  <div class="btns"><button class="p" id="csave">Lưu cài đặt</button></div></div>
+  ${syncHtml()}
+  <div class="card"><h2 style="margin-top:0">Sao lưu &amp; chuyển dữ liệu</h2>
+  <p class="mu">Nên tải file sao lưu định kỳ. Khi cần, chọn “Khôi phục từ file” để nạp lại. Bạn cũng có thể dùng mã văn bản bên dưới.</p>
+  <textarea id="bk" rows="4" placeholder="Dán mã sao lưu vào đây để khôi phục"></textarea>
+  <div class="btns"><button class="p" id="bdl">💾 Tải file sao lưu</button><button class="s" id="bup">📂 Khôi phục từ file</button><input type="file" id="bf" accept=".json,application/json" class="hide"></div>
+  <div class="btns"><button class="s" id="cp">📋 Sao chép mã</button><button class="s" id="rs">⤵️ Khôi phục</button></div>
+  <div class="btns"><button class="d" id="rst">Đặt lại dữ liệu mẫu (từ file Excel)</button></div></div>`;
+  $("#csave").onclick=()=>{Object.assign(S.cfg,{name:$("#c_name").value||"Phòng trọ",tenant:$("#c_tenant").value.trim(),re:+$("#c_re").value,rw:+$("#c_rw").value,rh:+$("#c_rh").value,tr:+$("#c_tr").value,rm:+$("#c_rm").value});save();toast("Đã lưu ✓")};
+  $("#cp").onclick=async()=>{const t=JSON.stringify(S);$("#bk").value=t;try{await navigator.clipboard.writeText(t);toast("Đã sao chép ✓")}catch(e){$("#bk").select();toast("Hãy chọn và sao chép mã trong ô")}};
+  $("#rs").onclick=()=>{try{const o=JSON.parse($("#bk").value);if(!o.recs||!o.cfg)throw 0;if(confirm("Thay toàn bộ dữ liệu hiện tại bằng bản sao lưu?")){S=o;save();toast("Đã khôi phục ✓");tab="list";render()}}catch(e){toast("Mã sao lưu không hợp lệ")}};
+  $("#rst").onclick=()=>{if(confirm("Xoá dữ liệu hiện tại và nạp lại dữ liệu từ Excel?")){S=JSON.parse(JSON.stringify(SEED));save();tab="list";render()}};
+  if(!SY){
+    $("#sj").oninput=e=>{try{const o=JSON.parse(atob(e.target.value.trim()));if(o.p&&o.k){$("#sp").value=o.p;$("#sk").value=o.k;toast("Đã điền Project ID và API Key")}}catch(x){}};
+    $("#sin").onclick=()=>auth("signInWithPassword");
+    $("#sup").onclick=()=>auth("signUp");
+  }else{
+    $("#snow").onclick=()=>pull();
+    $("#scp").onclick=async()=>{const t=btoa(JSON.stringify({p:SY.p,k:SY.k}));try{await navigator.clipboard.writeText(t);toast("Đã sao chép mã cấu hình ✓")}catch(e){prompt("Sao chép mã này:",t)}};
+    $("#soff").onclick=()=>{if(confirm("Đăng xuất đồng bộ trên máy này? Dữ liệu trên máy vẫn giữ nguyên.")){SY=null;try{localStorage.removeItem("tro127.sync")}catch(e){}setSt("");render()}};
+  }
+  $("#bdl").onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="tien-tro-sao-luu-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();toast("Đã tải file sao lưu ✓")};
+  $("#bup").onclick=()=>$("#bf").click();
+  $("#bf").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+    try{const o=JSON.parse(await f.text());if(!o.recs||!o.cfg)throw 0;
+      if(confirm("Thay toàn bộ dữ liệu hiện tại bằng file sao lưu này?")){S=o;save();toast("Đã khôi phục ✓");tab="list";render()}}
+    catch(x){toast("File sao lưu không hợp lệ")}};
+  $("#app").oninput=null;$("#app").onclick=null;
+}
+save(false);render();document.getElementById("st").onclick=()=>pull();pull();
+</script>
+</body>
+</html>
